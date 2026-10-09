@@ -1854,8 +1854,10 @@ $router->get("/Thumbs/Avatar.ashx", function() {
     if (isset($_GET['username'])) {
         header("Location: /Game/Tools/Avatar.ashx?username=" . $_GET['username']);
     } elseif (isset($_GET['userId'])) {
-        header("Location: /Game/Tools/Avatar.ashx?userId=" . $_GET['userId'])
-    } else { echo("No username or userId param."); }
+        header("Location: /Game/Tools/Avatar.ashx?userId=" . $_GET['userId']);
+    } else {
+        echo("No username or userId param."); 
+    }
 });
 
 $router->get("/Thumbs/Asset.ashx", function() {
@@ -1895,7 +1897,7 @@ $router->get("/Game/Tools/Avatar.ashx", function() {
     // Execute the script we just made and get the result
     $render = $NewRCC->execScript($script, rand(1, getrandmax()), 120);
     $path = "../storage/thumbnails/render.png";
-    $decodedRender = base64_decode($render)
+    $decodedRender = base64_decode($render);
     file_put_contents($path, $decodedRender);
     
     // not sure why we do this

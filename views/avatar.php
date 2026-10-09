@@ -2060,8 +2060,6 @@ c    </td><td>
                                     
                                     <div class="TileGroup">
 
-                                        <?=$pagebuilder->build_component("avatar_item", ["assetid"=>1, "action"=>"Remove"]);?>
-                                        
                                     </div>
                                 
                                 

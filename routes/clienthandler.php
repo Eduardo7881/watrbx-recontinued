@@ -97,6 +97,7 @@ $router->get('/asset/', function() {
 
         $id = $_GET["id"];
 	header("Location: /Asset?id=" . $id . "&version=" . $version);
+    }
 });
 
 $router->get("/Asset/BodyColors.ashx", function(){
