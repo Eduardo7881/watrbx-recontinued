@@ -1,0 +1,22 @@
+-- Hat v1.1.0
+
+local assetUrl = "rbxassetid://%assetid%"
+local baseUrl = "http://www.watrbx.xyz" -- no php, fuck, how we change this dynamically
+local fileExtension = "PNG"
+local x, y = 300, 300
+
+local ThumbnailGenerator = game:GetService("ThumbnailGenerator")
+
+pcall(function() game:GetService("ContentProvider"):SetBaseUrl(baseUrl) end)
+game:GetService("ScriptContext").ScriptsDisabled = true
+
+local accoutrement = game:GetObjects(assetUrl)[1]
+
+local handle
+
+accoutrement.Parent = workspace
+local focusParts = {}
+local extentsMinMax
+
+local result, requestedUrls = ThumbnailGenerator:Click(fileExtension, x, y, --[[hideSky = ]] true, --[[crop =]] true, extentsMinMax)
+return result
