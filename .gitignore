@@ -1,17 +1,23 @@
+# Private Stuff that should not be launched
 .env
 storage/PrivateNut.pem
 storage/thumbnails/*
 storage/assets/*
 ‎storage/logs/watrbx-mysqld.log‎
-storage/mariadb-pid
+storage/mariadb.pid
+storage/logs/*
 PrivateNut.pem
 public_key.pem
+
+# Pre-built clients and stuff
 public/SignedV1.apk
 public/SignedV2.apk
 public/SignedV3.apk
 public/Unsigned.apk
 public/watrbx.apk
 public/watrbxbootstrapper.exe
+
+# Cache
 public/.well-known/acme-challenge/nLy4PeD__Xue6eJqTqHEK_XahnoPDotOcvxg_2co78g
 storage/assets/03bc583f1d8e2db7f3d472200d6b0275
 storage/assets/6f974a75c3a71f509f3a70ed0577df49
@@ -23,4 +29,4 @@ storage/assets/41f2ad87b8dc964c07ef000e51ba26db
 storage/assets/61ec82e07626d98995c95b11a1aea996
 storage/assets/485da567ec0d9943d19c48cfda57b0a9
 storage/assets/c30c9697fa45505fe756d24b8e07a5fc
-storage/assets/d630dc690ca1517e50b123865e8755b9
+storage/assets/d630dc690ca1517e50b123865e8755bc
