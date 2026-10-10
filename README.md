@@ -1,47 +1,56 @@
-# WatrBX Recontinued (aka `watrbx-fixed`)
+# WatrBX Recontinued (a.k.a. `watrbx-fixed`)
+WatrBX Recontinued is a continuation of **watrbx 1**, an old Roblox revival from around 2015-2016.
 
-WatrBX Recontinued is a continuation of **WatrBX 1**, an old Roblox revival from around 2015-2016.
+The goal is to get an old 2016 Roblox client working with this server and fix the parts of the website that are still broken.
 
-The goal is to get the old 2016 Roblox client working with the revival and fix the parts of the website that are still broken.
+This is a project to help people build their own revivals!
+
+This project is entirely based on **watrbx 1's** source code.
 
 ## What's new?
 
-I've added a few things that weren't in the original revival:
+I've added a few things that weren't in the original revival, such as:
 
-- Functional Admin Panel (yes, this is the only part I vibe-coded, sorry 💀)
+- Functional Admin Panel (yes, this is the only part I used AI, sorry 💀)
 - Scripts to make starting and stopping the server easier
 - First-time setup script
 - Various fixes and patches
-- Local storage for assets, thumbnails, and other stuff
+- Local storage for assets, thumbnails, etc...
+
+This is not everything! You should check the code and roadmap!
 
 ## Roadmap
 
-- [ ] Character Customization
-- [ ] Player Renderers (half done)
-- [ ] Asset Renderers (Models)
-- [ ] Fix the Catalog Page (currently broken)
-- [ ] Fix the Develop Page (currently broken)
-- [x] Admin Panel
-- [x] Local Storage Patches
-- [x] Database Fixes
+- [ ] Character Customization (half done)
+- [X] Player Renderers
+- [X] Asset Renderers (Models)
+- [ ] Catalog and Develop Page (currently both are broken)
+- [X] Admin Panel
+- [X] Local Storage Patches
+- [X] Database Fixes
 - [ ] Account Settings Page (extremely broken right now)
+- [ ] Forum, Blog and Groups
+- [ ] Promotion Links (invite people to play this and the link owner gets robux and tixs from people joining using his link)
+- [ ] Most of the APIs (`<apiname>.roblox.com`)
+- [ ] DataPersistance (DataStores) (support w/ asteroid and local storage)
+- [ ] (Better) Discord Integration (Webhooks and stuff) (watrabi implemented it but very badly)
+- [X] Game Server APIs (but doesn't work since watrabi used fixed IPs, which I will change soon)
 
 ## Running
-
-I've only tested this project on Linux. The instructions below cover several operating systems, but I haven't tested all of them myself.
+I've only tested this project on Linux (Ubuntu). The instructions below cover several operating systems and distros, but I haven't tested all of them myself.
 
 ### Requirements
 
-You'll need:
+To run the server, you'll need to install these stuff:
 
 - PHP
 - Composer
 - MariaDB
 - OpenSSH
 - OpenSSL
-- Git
+- Git (or `gh`)
 
-Some PHP extensions may also be required depending on the code and your PHP version.
+Some PHP extensions may also be required depending on the code and your PHP version. This has been tested on PHP 8.5.
 
 ### Linux (Ubuntu / Debian)
 
@@ -76,7 +85,7 @@ If MariaDB isn't already running:
 sudo systemctl start mariadb
 ```
 
-Alternatively, if your environment uses the provided startup script:
+Alternatively, if your environment uses the provided startup script (Termux):
 
 ```bash
 ./start-db.sh &
@@ -88,7 +97,7 @@ Alternatively, if your environment uses the provided startup script:
 ./server
 ```
 
-Open the address displayed in your terminal.
+Open the address of the server (if local then go to `http://localhost:port`).
 
 ### Fedora
 
@@ -173,7 +182,6 @@ sudo systemctl enable --now mariadb
 ```
 
 ### macOS
-
 **Note:** macOS support has not been tested. These instructions assume you're using Homebrew.
 
 **1. Install Homebrew**
@@ -217,11 +225,9 @@ brew services start mariadb
 If a script fails because it uses Linux-specific commands, you'll need to adapt it for macOS.
 
 ### Windows
-
 **Note:** Windows support has not been tested. The easiest way to try running this project is through WSL2 with Ubuntu.
 
 #### Option 1: WSL2 (Recommended)
-
 **1. Install WSL2**
 
 Open PowerShell as Administrator and run:
@@ -274,8 +280,7 @@ sudo service mariadb start
 Open the local address displayed in the terminal using your Windows browser.
 
 #### Option 2: Native Windows
-
-Running the project directly on Windows may require additional changes.
+Running the project directly on Windows will require additional changes.
 
 The provided scripts use Unix-style shell commands, so `init.sh`, `start-db.sh`, and `server` may not work in a regular Command Prompt or PowerShell session.
 
@@ -298,10 +303,7 @@ I'm **NOT watrabi**, the original owner of WatrBX.
 This is **NOT WatrBX 2's source code**. It's also not a leak. The code was publicly available.
 
 ## About the Code
-
 I'm EXTREMELY new to PHP. I know the basics, but I'm still learning the more advanced stuff.
-
-I used AI (ChatGPT) to help build the Admin Panel and figure out how to get the project running, since the original instructions didn't really explain how to set everything up.
 
 I'm learning as I go, so don't be surprised if you find some questionable code in here. There's probably a better way to do some things, and I'll keep fixing stuff as I learn more.
 
