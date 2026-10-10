@@ -70,6 +70,7 @@ try {
         $router->addrouter('mobilehandler');
         $router->addrouter('discordbothandler');
         $router->addrouter('bootstraphandler');
+        $router->addrouter('rblx_apihandler');
 
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $method = $_SERVER['REQUEST_METHOD'];

@@ -1,4 +1,4 @@
-\<?php
+<?php
 use watrbx\thumbnails;
 use watrlabs\router\Routing;
 use watrlabs\watrkit\sanitize;
@@ -1930,6 +1930,45 @@ $router->get("/Thumbs/Asset.ashx", function() {
     header("Location: /images/defaultimage.png", true, 302); exit;
 });
 
+$router->get("/Game/Tools/InsertAsset.ashx", function() {
+    if (isset($_GET['nsets'])) {
+        $nsets = $_GET['nsets'];
+        $type = $_GET['type'];
+        $userId = ($nsets == 20) ? $_GET['userId'] : 0;
+        $sid = ($nsets !== 20 && $nsets !== 10) ? $_GET['sid'] : 0;
+
+        if ($nsets == 10) {
+	    readfile("https://sets.pizzaboxer.xyz/Game/Tools/InsertAsset.ashx?nsets=" . (string)$nsets . "&type=" . (string)$type);
+	    exit;
+        } elseif ($nsets == 20) {
+            readfile("https://sets.pizzaboxer.xyz/Game/Tools/InsertAsset.ashx?nsets=" . (string)$nsets . "&type=" . (string)$type . "&userid=" . (string)$userId);
+            exit;
+        } else {
+            readfile("https://sets.pizzaboxer.xyz/Game/Tools/InsertAsset.ashx?sid=" . (string)$sid);
+            exit;
+        }
+    }
+});
+
+$router->get("/Game/Badge/HasBadge.ashx", function() {
+    global $db;
+    error_reporting(E_ERROR);
+
+    if (!empty($_GET['UserId'])) {
+        $userId = (int)$_GET['UserId'];
+        $badgeId = (int)$_GET['BadgeId'];
+
+        $badgeQuery = $db->prepare("SELECT * FROM `ownedbadges` WHERE `userId` = :userId AND `badgeId` = :badgeId");
+        $badgeQuery->execute(['userId'=>$userId,'badgeId'=>$badgeId]);
+        $badge = $badgeQuery->fetch();
+        if (!is_array($badge)) {
+            echo "0";
+        } else {
+            echo "1";
+        }
+    }
+});
+
 $router->get("/Game/Tools/Avatar.ashx", function() {
     //$userId = $_GET["userId"];
     $target = isset($_GET["userId"]) ? (int)$_GET["userId"] : 0;
@@ -1987,3 +2026,58 @@ $router->get("/Asset/CharacterFetch.ashx", function() {
     if (!isset($_GET["userId"])) { die("No user id provided."); }
     $id = intval($_GET["userid"]);
 });
+
+/* Account APIs */
+$router->group("/account", function($router) {
+    $router->get("/username/update.ashx", function() {
+        $auth = new authentication();
+        if (!$auth->hasaccount()) {
+            die(array('success'=>false,'message'=>'No authorization token.'));
+        };
+        $userinfo = $auth->getuserinfo($_COOKIE["_ROBLOSECURITY"]);
+
+        global $db;
+
+        try {
+            $oldName = $userinfo->username;
+            $userId = $userinfo->id;
+            $robux = $userinfo->robux ?? 0;
+            $newName = isset($_GET["username"]) ? (string)(urldecode($_GET["username"])) : null;
+            if ($newName === null) die(json_encode(array('success'=>false,'message'=>'Invalid username.')));
+            
+            if ($newName === "LocalPlayer") die(json_encode(array('success'=>false,'message'=>'Invalid username.')));
+            if (strlen($newName) < 3) die(json_encode(array('success'=>false,'message'=>'Username is too short.')));
+            if (strlen($newName) > 20) die(json_encode(array('success'=>false,'message'=>'Username is too long.')));
+
+            $chkquery = $db->prepare("SELECT * FROM `users` WHERE `username` = :username");
+            $chkquery->execute(['username'=>$newName]);
+            $check = $chkquery->fetch();
+            if ($check !== null) die(json_encode(array('success'=>false,'message'=>'Username is already taken.')));
+
+            if ($robux > 1000) {
+                $updateQuery = $db->prepare("UPDATE `users` SET `username` = :newName WHERE `id` = :userId");
+                $updateQuery->execute(['newName'=>$newName,'userId'=>$userId]);
+
+                // TODO: Save this onto the list of old usernames (when i create it lol)
+                $updateQuery = $db->prepare("UPDATE `users` SET `robux` = :balance WHERE `id` = :userId");
+                $updateQuery->execute(['balance'=>($Robux - 1000),'userId'=>$userId]);
+                
+                die(json_encode(array('success'=>true)));
+            } else {
+                die(json_encode(array('success'=>false,'message'=>'You need 1000 ROBUX to change your username.')));
+            }
+        } catch (Exception $e) {
+            die(json_encode(array('success'=>false,'message'=>'An error ocourred.','php_info'=>$e->getMessage())));
+        }
+    });
+
+    $router->get("/email/verify.ashx", function() {
+        header("Content-Type: application/json");
+        die(json_encode(array('verifiedUserHatAssetId'=>102611803)));
+    });
+
+    $router->get("signupredir.ashx", function() {
+        header("Location: /");
+	die();
+    });
+}, '');

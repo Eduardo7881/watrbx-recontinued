@@ -24,6 +24,20 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `datastore`
+--
+
+CREATE TABLE `datastore` (
+  `scope` VARCHAR(128) NOT NULL,
+  `store_name` VARCHAR(128) NOT NULL,
+  `target` VARCHAR(191) NOT NULL,
+  `value` LONGTEXT NOT NULL,
+  PRIMARY KEY (`scope`, `store_name`, `target`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `activeplayers`
 --
 
@@ -303,6 +317,17 @@ CREATE TABLE `ownedassets` (
   `userid` int NOT NULL,
   `assetid` int NOT NULL,
   `time` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ownedbadges`
+--
+
+CREATE TABLE `ownedbadges` (
+  `userId` int NOT NULL,
+  `badgeId` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 
 -- --------------------------------------------------------
