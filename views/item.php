@@ -69,9 +69,9 @@ $pagebuilder->setlegacy(true);
 $pagebuilder->buildheader();
 
 
-
-if($asset->prodcategory == 1)
-{
+if ((int)$asset->prodcategory === 10) {
+    $thumb = "/Thumbs/Asset.ashx?asset=" . (int)$asset->id;
+} elseif((int)$asset->prodcategory == 1) {
     $thumb = "//c0.watrbx.xyz/" . $asset->fileid;
 } else {
     $thumb = $thumbs->get_asset_thumb($asset->id);

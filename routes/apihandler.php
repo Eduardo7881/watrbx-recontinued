@@ -5,7 +5,7 @@ use watrlabs\watrkit\sanitize;
 use watrlabs\authentication;
 use watrbx\gameserver;
 use watrbx\catalog;
-use rcc\RCCServiceSoap;
+use watrbx\RCCServiceSoap;
 use Cocur\Slugify\Slugify;
 use watrbx\sitefunctions;
 use watrbx\relationship\friends;
@@ -103,6 +103,12 @@ $router->get('/thumbnail/resolve-hash/{the}', function($the){
 
     die(json_encode($json));
 });
+
+/*
+$router->get("/thumbnails/3dfiles/{assetId}", function($assetId) {
+    $assetId = preg_replace('/[0-9]/', ", (string)$assetId);
+});
+*/
 
 $router->post('/api/item.ashx', function(){
     header("Content-type: application/json");
@@ -1430,6 +1436,7 @@ $router->get('/leaderboards/game/json', function(){
     die('[]');
 }); 
 
+/*
 $router->get('/Character.aspx', function(){
     // TODO: Make this actually load the user's avatar not user id 1's avatar.
     // Sorry for all this concaternation, i think theres a better way to do it but idk how to
@@ -1443,6 +1450,25 @@ $router->get('/Character.aspx', function(){
         die($_ENV["BASE_URL"] . "/Asset/BodyColors.ashx?userid=1;" . $_ENV["BASE_URL"] . "/asset/?id=5;" . $_ENV["BASE_URL"] . "/asset/?id=7;" . $_ENV["BASE_URL"] . "/asset/?id=10;");
     }
     
+});
+*/
+$router->get("/Character.aspx", function() {
+    header("Content-Type: application/json");
+    global $db;
+
+    $userId = isset($_GET["ID"]) ? (int)$_GET["ID"] : (isset($_GET["userId"]) ? (int)$_GET["userId"] : 1);
+    $user = $db->table("users")->where("id", max(1, $userId))->first();
+    if (!$user) { http_response_code(404); die("User not found"); }
+   
+    $base = rtrim($_ENV["BASE_URL"], "/");
+    $items = [$base . "/Asset/BodyColors.ashx?userid=" . (int)$user->id];
+    foreach (['tshirt', 'shirt', 'pants', 'hat1', 'hat2', 'hat3'] as $column) {
+        $assetId = (int)($user->$column ?? 0);
+        if ($assetId > 0) {
+            $items[] = $base . "/asset/?id=" . $assetId;
+        }
+    }
+    die(implode(';', $items) . ';');
 });
 
 $router->get('/users/inventory/list-json', function(){
@@ -1535,9 +1561,6 @@ $router->get('/Game/Join.ashx', function() {
     }
     
 });
-
-
-
 
 $router->get("/UserCheck/checkifinvalidusernameforsignup", function() {
     header("Content-type: application/json");
@@ -1860,50 +1883,88 @@ $router->get("/Thumbs/Avatar.ashx", function() {
     }
 });
 
+$router->get("/thumbnail/asset", function() {
+    $assetId = isset($_GET["assetId"]) ? (int)$_GET["assetId"] : 0;
+    $width = isset($_GET["width"]) ? max(1, (int)$_GET["width"]) : 500;
+    $height = isset($_GET["height"]) ? max(1, (int)$_GET["height"]) : 500;
+    if ($assetId < 1) { http_response_code(400); die("Invalid or missing asset id"); }
+  
+    header("Content-Type: application/json");
+    echo json_encode(['Url' => rtrim($_ENV["BASE_URL"], '/') . '/Thumbs/Asset.ashx?asset=' . $assetId, 'Final' => true, 'width' => width, 'height' => height]);
+    exit;
+});
+
 $router->get("/Thumbs/Asset.ashx", function() {
-    // TODO
-    if (!isset($_GET["asset"])) {
-        echo "No asset id param";
-	die();
+    global $db;
+
+    $assetId = isset($_GET["asset"]) ? (int)$_GET["asset"] : (isset($_GET["assetId"]) ? (int)$_GET["assetId"] : 0);
+    if ($assetId < 1) { http_response_code(400); die("Invalid or missing asset id."); }
+
+    $asset = $db->table("assets")->where("id", $assetId)->first();
+    if (!$asset) { http_response_code(404); die("Asset not found"); }
+
+    try {
+        $rcc = new RCCServiceSoap($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV['BASE_URL']);
+        $script = file_get_contents("../storage/lua/assetRenderer.lua");
+        $script = str_replace("%baseurl%", $_ENV["BASE_URL"], $script);
+        $script = str_replace("%assetId%", $assetId, $script);
+        
+        $render = $rcc->execScript($script, rand(1, getrandmax()), 120);
+        $png = base64_decode((string)$render, true);
+        if ($png !== false && substr($png, 0, 8) === "\x89PNG\r\n\x1a\n") {
+            file_put_contents($cacheFile, $png, LOCK_EX);
+            header("Content-Type: image/png");
+	    header("Cache-Control: public, max-age=86400");
+            echo $png; exit;
+        }
+    } catch (\Throwable $e) {
+        error_log('[AssetRenderer] ' . $e->getMessage());
     }
+
+    // Rendering can be unavailable when the RCC is offline;
+    $thumbs = new thumbnails();
+    $fallback = $thumbs->get_asset_thumb($assetId);
+    if ($fallback && strpos($fallback, '/images/defaultimage.png') === false) {
+        header("Location: " . $fallback, true, 302); exit;
+    }
+    header("Location: /images/defaultimage.png", true, 302); exit;
 });
 
 $router->get("/Game/Tools/Avatar.ashx", function() {
-    // TODO: Use real avatar
-    // We can use the same logic for model thumbs
     //$userId = $_GET["userId"];
+    $target = isset($_GET["userId"]) ? (int)$_GET["userId"] : 0;
+    
+    /*
+    if ($target < 1 && isset($_GET["username"])) {
+        $username = trim((string)$_GET["username"]);
+        $user = $username !== "" ? $db->table("users")->where("username", $username)->first();
+        if ($user) $target = (int)$user->id;
+    }
+    */
 
-    if (isset($_GET["userId"])) {
-	$target = (int)$_GET["userId"];
-    } elseif (isset($_GET["username"])) {
-       // TODO: get user id by name
-       $target = "1";
+    if ($target < 1) { http_response_code(400); error_log("[AvatarRenderer] No UserId or Username"); die("Invalid userid or username"); }
+    
+    try {
+        $NewRCC = new RCCServiceSoap($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV["BASE_URL"]); // baseurl was roblox.com
+        $script = file_get_contents("../storage/lua/avatarRenderer.lua");
+        $script = str_replace("%target%", $target, $script);
+        $script = str_replace("%baseurl%", $_ENV["BASE_URL"], $script);
+
+        // Execute the script we just made and get the result
+        $render = $NewRCC->execScript($script, rand(1, getrandmax()), 120);
+        $png = base64_decode((string)$render, true);
+        if ($png !== false && substr($png, 0, 8) === "\x89PNG\r\n\x1a\n") {
+            header("Content-Type: image/png");
+            header("Cache-Control: public, max-age=3600");
+            echo $png; exit;
+        }
+        error_log($png);
+    } catch (\Throwable $e) {
+        error_log("[AvatarRenderer] " . $e->getMessage());
     }
 
-    $NewRCC = new RCCServiceSoap("127.0.0.1", 64989, $_ENV["BASE_URL"]); // baseurl was roblox.com
-    $script = '
-    -- Services
-    local Players, ContentProvider, ScriptContext, ThumbnailGenerator = game:GetService("Players"), game:GetService("ContentProvider"), game:GetService("ScriptContext"), game:GetService("ThumbnailGenerator")
-    ContentProvider:SetBaseurl($_ENV["BASE_URL"]) // was http://localhost
-    ScriptContext.ScriptsDisabled = true
-    
-    -- Make Thumbnail
-    -- local Player = Players:CreateLocalPlayer($target)
-    local Player = game:GetService("Players"):CreateLocalPlayer(1)
-    if Player == nil then Player = Players:GetPlayers[1] end
-    Player:LoadCharacter()
-    return ThumbnailGenerator:Click("PNG", 500, 500, true)';
-
-    // Execute the script we just made and get the result
-    $render = $NewRCC->execScript($script, rand(1, getrandmax()), 120);
-    $path = "../storage/thumbnails/render.png";
-    $decodedRender = base64_decode($render);
-    file_put_contents($path, $decodedRender);
-    
-    // not sure why we do this
-    $content = file_get_contents($path);
-    header("Content-Type: image/png");
-    die($content);
+    // use default thumb if rcc doesnt work
+    header("Location: /images/defaultimage.png", true, 302); exit;
 });
 
 $router->get("/GetCurrentClientVersionUpload", function() {
@@ -1925,5 +1986,4 @@ $router->get("/Asset/CharacterFetch.ashx", function() {
 
     if (!isset($_GET["userId"])) { die("No user id provided."); }
     $id = intval($_GET["userid"]);
-
 });

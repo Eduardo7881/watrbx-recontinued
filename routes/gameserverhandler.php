@@ -391,36 +391,42 @@ $router->group('/api/v1/gameserver', function($router) {
                             header("Content-type: text/lua");
                             $lua = file_get_contents("../storage/lua/hat.lua");
                             $lua = str_replace("%assetid%", $assetinfo->id, $lua);
+                            $lua = str_replace("%url%", (string)$_ENV["BASE_URL"], $lua);
                             die($lua);
                             break;
                         case "9":
                             header("Content-type: text/lua");
                             $lua = file_get_contents("../storage/lua/place.lua");
                             $lua = str_replace("%assetid%", $assetinfo->id, $lua);
+                            $lua = str_replace("%url%", (string)$_ENV["BASE_URL"], $lua);
                             die($lua);
                             break;
                         case "11":
                             header("Content-type: text/lua");
                             $lua = file_get_contents("../storage/lua/shirt.lua");
                             $lua = str_replace("%assetid%", $assetinfo->id, $lua);
+                            $lua = str_replace("%url%", (string)$_ENV["BASE_URL"], $lua);
                             die($lua);
                             break;
                         case "12":
                             header("Content-type: text/lua");
                             $lua = file_get_contents("../storage/lua/pant.lua");
                             $lua = str_replace("%assetid%", $assetinfo->id, $lua);
+                            $lua = str_replace("%url%", (string)$_ENV["BASE_URL"], $lua);
                             die($lua);
                             break;
                         case "17":
                             header("Content-type: text/lua");
                             $lua = file_get_contents("../storage/lua/head.lua");
                             $lua = str_replace("%assetid%", $assetinfo->id, $lua);
+                            $lua = str_replace("%url%", (string)$_ENV["BASE_URL"], $lua);
                             die($lua);
                             break;
                         case "13":
                             header("Content-type: text/lua");
                             $lua = file_get_contents("../storage/lua/decal.lua");
                             $lua = str_replace("%assetid%", $assetinfo->id, $lua);
+                            $lua = str_replace("%url%", (string)$_ENV["BASE_URL"], $lua);
                             die($lua);
                             break;
                     }

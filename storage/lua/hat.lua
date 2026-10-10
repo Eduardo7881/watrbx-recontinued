@@ -1,7 +1,7 @@
 -- Hat v1.1.0
 
 local assetUrl = "rbxassetid://%assetid%"
-local baseUrl = "http://www.watrbx.xyz" -- no php, fuck, how we change this dynamically
+local baseUrl = "%url%/"
 local fileExtension = "PNG"
 local x, y = 300, 300
 

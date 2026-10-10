@@ -1,4 +1,7 @@
 <?php
+
+namespace watrbx;
+
 class RCCServiceSoap {
     public $ip;
     public $port;

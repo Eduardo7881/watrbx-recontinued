@@ -1,12 +1,53 @@
-<?php 
+\<?php 
 use watrlabs\watrkit\pagebuilder;
 use watrlabs\authentication;
 $auth = new authentication();
 $pagebuilder = new pagebuilder();
 
+global $db; // Do NOT remove, breaks everything...
+
 $auth->requiresession();
 $userinfo = $auth->getuserinfo($_COOKIE["_ROBLOSECURITY"]);
+if (!$userinfo) {
+    header("Location: /");
+    die();
+}
 
+/* avatar stuff */
+$avatarColors = [];
+$colorHexById = [1=>'#F2F3F3', 5=>'#D7C59A', 11=>'#80BDDC', 21=>'#C4281C', 23=>'#0D69AC', 24=>'#F5CD30', 26=>'#1B2A35', 28=>'#287F47', 29=>'#A1C48C', 37=>'#4B974B', 1003=>'#111111', 1010=>'#0000FF', 1011=>'#002060', 1012=>'#2154B9', 1024=>'#AFDDFF', 1030=>'#FFCC99'];
+$colorColumns = ['Head'=>'head_color', 'Torso'=>'torso_color', 'LeftArm'=>'left_arm_color', 'LeftLeg'=>'left_leg_color', 'RightArm'=>'right_arm_color', 'RightLeg'=>'right_leg_color'];
+$avatarCategory = (string)($_GET['category'] ?? "TShirts");
+$avatarCategories = [
+    'Heads'=>[17], 'Faces'=>[18], 'Hats'=>[8,41,42,43,44,45,46,47], 'TShirts'=>[2], 'Shirts'=>[11],
+    'Pants'=>[12], 'Gear'=>[19], 'Torsos'=>[27], 'L Arms'=>[29], 'R Arms'=>[28], 'L Legs'=>[30], 'R Legs'=>[31], 'Packages'=>[32]
+];
+
+if (!isset($avatarCategories[$avatarCategory])) $avatarCategory = "TShirts";
+
+$avatarUser = $db->table("users")->where("id", (int)$userinfo->id)->first();
+if (!$avatarUser) {
+    header("Location: /");
+    die();
+}
+
+$wornAssetIds = array_values(array_unique(array_filter(array_map('intval', [
+    $avatarUser->tshirt ?? 0, $avatarUser->shirt ?? 0, $avatarUser->pants ?? 0,
+    $avatarUser->hat1 ?? 0, $avatarUser->hat2 ?? 0, $avatarUser->hat3 ?? 0
+]))));
+
+// get every color on the database and put it onto avatarColors
+foreach ($colorColumns as $part => $column) {
+    $avatarColors[$part] = (int)($avatarUser->$column ?? 1030);
+};
+
+$bodyColorHex = function($part) use ($avatarColors, $colorHexById) {
+    // Transforms a id into an Hex Number
+    $id = (int)($avatarColors[$part] ?? 1030);
+    return $colorHexById[$id] ?? '#FFCC99';
+};
+
+/* page stuff */
 $pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=main___7000c43d73500e63554d81258494fa21_m.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=page___7a27dc130118fdc2c185a6a1a3db1c2f_m.css');
 $pagebuilder->addresource('jsfiles', '/js/f49d858ef181e7cd401d8fcb4245e6e8.js.gzip');
@@ -68,7 +109,7 @@ $pagebuilder->buildheader();
 
 <div id="UserAvatar" class="thumbnail-holder" data-reset-enabled-every-page data-3d-thumbs-enabled 
      data-url="/thumbnail/user-avatar?userId=65367932&amp;thumbnailFormatId=124&amp;width=352&amp;height=352" style="width:352px; height:352px;">
-    <span class="thumbnail-span" data-3d-url="/avatar-thumbnail-3d/json?userId=65367932"  data-js-files='/js/47e6e85800c4ed3c4eef848c077575a9.js.gzip' ><img alt='Aragorn35016' class='' src='/images/defaultimage.png' /></span>
+    <span class="thumbnail-span" data-3d-url="/avatar-thumbnail-3d/json?userId=65367932"  data-js-files='/js/47e6e85800c4ed3c4eef848c077575a9.js.gzip' ><img alt='Aragorn35016' class='' src='/Thumbs/Avatar.ashx?userId=1' /></span>
     <span class="enable-three-dee btn-control btn-control-small"></span>
 </div>
 
@@ -1942,7 +1983,6 @@ c    </td><td>
                                         <?php
 
                                             global $db;
-
                                             $ownedassets = $db->table("ownedassets")->where("userid", $userinfo->id)->get();
 
                                             foreach ($ownedassets as $assetid){
@@ -2059,7 +2099,15 @@ c    </td><td>
                             
                                     
                                     <div class="TileGroup">
-
+				        <?php
+					    global $db;
+					    foreach($wornAssetIds as $wornId) {
+					        $wornAsset = $db->table("assets")->where("id", (int)$wornId)->first();
+						if ($wornAsset) {
+						    $pageBuilder->build_component("avatar_item", ["assetid"=>(int)$wornAsset->id, "action"=>"Remove"]);
+                                                }
+					    }
+                                        ?>
                                     </div>
                                 
                                 

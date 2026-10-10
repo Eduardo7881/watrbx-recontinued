@@ -1,7 +1,7 @@
 -- Place v1.0.2
 
 local assetUrl = "rbxassetid://%assetid%"
-local baseUrl = "http://www.watrbx.xyz/"
+local baseUrl = "%url%/"
 local fileExtension = "PNG"
 local x, y = 581, 327
 local ThumbnailGenerator = game:GetService("ThumbnailGenerator")

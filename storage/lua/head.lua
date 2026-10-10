@@ -1,7 +1,7 @@
 -- Head v1.2.0
 
 local assetUrl = "rbxassetid://%assetid%"
-local baseUrl = "http://www.watrbx.xyz/"
+local baseUrl = "%url%/"
 local fileExtension = "PNG"
 local x, y = 300, 300
 local mannequinId = 1785197

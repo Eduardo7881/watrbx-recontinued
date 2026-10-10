@@ -827,13 +827,18 @@ $router->get("/home", function() {
 });
 
 $router->post('/my/character.aspx', function(){
-    $pagebuilder = new pagebuilder();
-    $pagebuilder->build_component("avatar_item", ["assetid"=>5, "action"=>"Wear"]);
+    $target = (string)($_POST['__EVENTTARGET'] ?? "");
+    if (preg_match('/(Wear|Remove)[|:](\d+)$/i', $target, $m)) {
+        header("Location: /my/character.aspx?action=" . strtolower($m[1]) . "&assetId=" . (string)$m[2]);
+        exit;
+    }
+    header("Location: /my/character.aspx"); exit;
 });
 
 $router->get('/thumbnail/user-avatar', function(){ 
-    http_response_code(500);
-    die();
+    $userId = isset($_GET["userId"]) ? (int)$_GET["userId"] : 0;
+    if ($userId < 1) { http_response_code(400); die("Missing userid."); }
+    header("Location: /Game/Tools/Avatar.ashx?userId=" . $userId, true, 302); exit;
 });
 
 $router->get("/my/account", function() {
@@ -842,8 +847,70 @@ $router->get("/my/account", function() {
 });
 
 $router->get("/my/character.aspx", function() {
-    $page = new pagebuilder;
-    $page::get_template("avatar");
+    $auth = new authentication();
+    $auth->requiresession();
+    $user = $auth->getuserinfo($_COOKIE["_ROBLOSECURITY"] ?? null);
+    if (!$user) { header("Location: /"); die(""); }
+ 
+    global $db;
+    $user = $db->table("users")->where("id", $user->id)->first();
+    if (!$user) { echo "wtf"; }
+
+    /* Handle Character Update Requests */
+    if (!isset($_GET['action'])) { // No action, dont do anything just go 2 page
+        $page = new pagebuilder;
+        $page::get_template("avatar");
+        die();
+    }
+
+    if ($_GET['action'] === 'color') { // do color things and load page
+        $part = (string)($_GET['part'] ?? "");
+        $colorId = isset($_GET['colorId']) ? (int)$_GET["colorId"] : 0;
+        $columns = ['Head'=>'head_color', 'Torso'=>'torso_color', 'LeftArm'=>'left_arm_color', 'LeftLeg'=>'left_leg_color', 'RightArm'=>'right_arm_color', 'RightLeg'=>'right_leg_color'];
+        if (!isset($columns[$part]) || $colorId < 1 || $colorId > 10000) { http_response_code(400); die("Stop messing around invalid stuff"); }
+
+        $db->table("users")->where("id", (int)$user->id)->update([$columns[$part] => (string)$colorId]);
+        $page = new pagebuilder;
+        $page::get_template("avatar");
+    } elseif (isset($_GET["assetId"])) { // do asset things and load page
+        $assetId = (int)$_GET["assetId"];
+        $action = strtolower((string)$_GET["action"]);
+        $asset = $db->table("assets")->where("id", $assetId)->first();
+        $owned = $db->table("ownedassets")->where('userid', (int)$user->id)->where("assetid", $assetId)->first();
+        if (!$asset || !$owned || !$in_array($action, ['wear', 'remove'], true)) {
+            http_response_code(400);
+            die("Stop messing around invalid stuff");
+        }
+
+        $type = (int)$asset->prodcategory;
+        $updates = [];
+        $clothingSlots = [2=>'tshirt',11=>'shirt',12=>'pants'];
+        if (isset($clothingSlots[$type])) {
+            $column = $clothingSlots[$type];
+            $updates[$column] = ($action === 'wear') ? $assetId : (((int)$user->$column === $assetId) ? 0 : (int)$user->$column);
+        } elseif (in_array($type, [8,41,42,43,44,45,46,47], true)) {
+            $hatColumns = ['hat1', 'hat2', 'hat3'];
+            $existing = [];
+            foreach ($hatColumns as $col) $existing[$col] = (int)($user->$col ?? 0);
+
+            if ($action === 'remove') {
+                foreach ($hatColumns as $col) $existing[$col] = (((int)$user->$column === $assetId) ? 0 : (int)$user->$column);
+            } elseif (!in_array($assetId, $existing, true)) {
+                $empty = null;
+                foreach ($hatColumns as $col) if ($existing[$col] === 0 && $empty == null) $empty = $col;
+                $updates[$empty ?? 'hat1'] = $assetId;
+            }
+        } else {
+            $page = new pagebuilder;
+            $page::get_template("avatar");
+            die();
+        }
+        if ($updates) $db->table('users')->where('id', (int)$user->id)->update($updates);
+        
+        $page = new pagebuilder;
+        $page::get_template("avatar");
+        die();
+    }
 });
 
 $router->get("/my/groups.aspx", function() {

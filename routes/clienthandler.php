@@ -100,7 +100,13 @@ $router->get('/asset/', function() {
     }
 });
 
+$validColor = function($value) {
+    $id = (int)$value;
+    return ($id > 0 && $id <= 10000) ? $id : 1030;
+};
+
 $router->get("/Asset/BodyColors.ashx", function(){
+    global $db;
     header("Content-Type: application/xml");
     
     /*
@@ -112,18 +118,29 @@ $router->get("/Asset/BodyColors.ashx", function(){
     $torso = $_GET['torsoc'];
     */
 
+    // fat boy
+    $userId = isset($_GET["userid"]) ? (int)$_GET["userid"] : (isset($_GET["userId"]) ? (int)$_GET["userId"] : 1);
+    $user = $db->table("users")->where("id", max(1, $userId))->first();
+
+    $head = $validColor($user->head_color ?? 1030);
+    $leftArm = $validColor($user->left_arm_color ?? 1030);
+    $leftLeg = $validColor($user->left_leg_color ?? 1030);
+    $rightArm = $validColor($user->right_arm_color ?? 1030);
+    $rightLeg = $validColor($user->right_leg_color ?? 1030);
+    $torso = $validColor($user->torso_color ?? 1030);
+
     die('<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation=$_ENV["BASE_URL"] . "/roblox.xsd" version="4">
             <External>null</External>
             <External>nil</External>
             <Item class="BodyColors" referent="RBX2DC0258909A9441E8A72097F024F5FC7">
                 <Properties>
-                    <int name="HeadColor">1030</int>
-                    <int name="LeftArmColor">1030</int>
-                    <int name="LeftLegColor">1030</int>
+                    <int name="HeadColor">' . $head . '</int>
+                    <int name="LeftArmColor">' . $leftArm . '</int>
+                    <int name="LeftLegColor">' . $leftLeg . '</int>
                     <string name="Name">Body Colors</string>
-                    <int name="RightArmColor">1030</int>
-                    <int name="RightLegColor">1030</int>
-                    <int name="TorsoColor">1030</int>
+                    <int name="RightArmColor">' . $rightArm . '</int>
+                    <int name="RightLegColor">' . $rightLeg . '</int>
+                    <int name="TorsoColor">' . $torso . '</int>
                 </Properties>
             </Item>
         </roblox>');
@@ -147,17 +164,16 @@ $router->get('/GetAllowedMD5Hashes/', function(){
 });
 
 $router->get('/game/LoadPlaceInfo.ashx', function(){
-    die('
-// WOAH WOAH, almost everything here is http://localhost/ instead of BASE_URL!
-pcall(function() game:GetService("SocialService"):SetFriendUrl($_ENV["BASE_URL"] . "/Game/LuaWebService/HandleSocialRequest.ashx?method=IsFriendsWith&playerid=%d&userid=%d") end)
-pcall(function() game:GetService("SocialService"):SetBestFriendUrl($_ENV["BASE_URL"] . "/Game/LuaWebService/HandleSocialRequest.ashx?method=IsBestFriendsWith&playerid=%d&userid=%d") end)
-pcall(function() game:GetService("SocialService"):SetGroupUrl($_ENV["BASE_URL"] . "/Game/LuaWebService/HandleSocialRequest.ashx?method=IsInGroup&playerid=%d&groupid=%d") end)
-pcall(function() game:GetService("SocialService"):SetGroupRankUrl($_ENV["BASE_URL"] . "/Game/LuaWebService/HandleSocialRequest.ashx?method=GetGroupRank&playerid=%d&groupid=%d") end)
-pcall(function() game:GetService("SocialService"):SetGroupRoleUrl($_ENV["BASE_URL"] . "/Game/LuaWebService/HandleSocialRequest.ashx?method=GetGroupRole&playerid=%d&groupid=%d") end)
-pcall(function() game:GetService("GamePassService"):SetPlayerHasPassUrl($_ENV["BASE_URL"] . "/Game/GamePass/GamePassHandler.ashx?Action=HasPass&UserID=%d&PassID=%d") end)
-pcall(function() game:GetService("MarketplaceService"):SetProductInfoUrl($_ENV["BASE_URL"] . "/marketplace/productinfo?assetId=%d") end)
-pcall(function() game:GetService("MarketplaceService"):SetDevProductInfoUrl($_ENV["BASE_URL"] . "/marketplace/productDetails?productId=%d") end)
-pcall(function() game:GetService("MarketplaceService"):SetPlayerOwnsAssetUrl($_ENV["BASE_URL"] . "/ownership/hasasset?userId=%d&assetId=%d") end)
+    die('local baseUrl = ' . $_ENV["BASE_URL"] . '
+pcall(function() game:GetService("SocialService"):SetFriendUrl(baseUrl .. "/Game/LuaWebService/HandleSocialRequest.ashx?method=IsFriendsWith&playerid=%d&userid=%d") end)
+pcall(function() game:GetService("SocialService"):SetBestFriendUrl(baseUrl .. "/Game/LuaWebService/HandleSocialRequest.ashx?method=IsBestFriendsWith&playerid=%d&userid=%d") end)
+pcall(function() game:GetService("SocialService"):SetGroupUrl(baseUrl .. "/Game/LuaWebService/HandleSocialRequest.ashx?method=IsInGroup&playerid=%d&groupid=%d") end)
+pcall(function() game:GetService("SocialService"):SetGroupRankUrl(baseUrl .. "/Game/LuaWebService/HandleSocialRequest.ashx?method=GetGroupRank&playerid=%d&groupid=%d") end)
+pcall(function() game:GetService("SocialService"):SetGroupRoleUrl(baseUrl .. "/Game/LuaWebService/HandleSocialRequest.ashx?method=GetGroupRole&playerid=%d&groupid=%d") end)
+pcall(function() game:GetService("GamePassService"):SetPlayerHasPassUrl(baseUrl .. "/Game/GamePass/GamePassHandler.ashx?Action=HasPass&UserID=%d&PassID=%d") end)
+pcall(function() game:GetService("MarketplaceService"):SetProductInfoUrl(baseUrl .. "/marketplace/productinfo?assetId=%d") end)
+pcall(function() game:GetService("MarketplaceService"):SetDevProductInfoUrl(baseUrl .. "/marketplace/productDetails?productId=%d") end)
+pcall(function() game:GetService("MarketplaceService"):SetPlayerOwnsAssetUrl(baseUrl .. "/ownership/hasasset?userId=%d&assetId=%d") end)
 pcall(function() game:SetPlaceVersion(1) end)
     ');
 });
