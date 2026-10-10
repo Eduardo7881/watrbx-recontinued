@@ -2,6 +2,8 @@
 storage/PrivateNut.pem
 storage/thumbnails/*
 storage/assets/*
+‎storage/logs/watrbx-mysqld.log‎
+storage/mariadb-pid
 PrivateNut.pem
 public_key.pem
 public/SignedV1.apk
