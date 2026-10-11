@@ -106,7 +106,7 @@ menu_item() {
     printf '  %s[%s%s%s]%s  %-34s %s\n' "$C_CYAN" "$C_BOLD" "$1" "$C_RESET" "$C_RESET" "$2" "${3:-}"
 }
 
-pause() { printf '\n'; read -r -p 'Pressione Enter para continuar...' _ || true; }
+pause() { printf '\n'; read -r -p 'Press Enter to return...' _ || true; clear; }
 
 show_dashboard() {
     local server_count instance_count idle_count busy_count db_status

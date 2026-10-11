@@ -6,6 +6,7 @@ use watrlabs\authentication;
 use watrbx\gameserver;
 use watrbx\catalog;
 use watrbx\RCCServiceSoap;
+use rcc\RCC;
 use Cocur\Slugify\Slugify;
 use watrbx\sitefunctions;
 use watrbx\relationship\friends;
@@ -1904,18 +1905,14 @@ $router->get("/Thumbs/Asset.ashx", function() {
     if (!$asset) { http_response_code(404); die("Asset not found"); }
 
     try {
-        $rcc = new RCCServiceSoap($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV['BASE_URL']);
-        $script = file_get_contents("../storage/lua/assetRenderer.lua");
-        $script = str_replace("%baseurl%", $_ENV["BASE_URL"], $script);
-        $script = str_replace("%assetId%", $assetId, $script);
-        
-        $render = $rcc->execScript($script, rand(1, getrandmax()), 120);
-        $png = base64_decode((string)$render, true);
-        if ($png !== false && substr($png, 0, 8) === "\x89PNG\r\n\x1a\n") {
-            file_put_contents($cacheFile, $png, LOCK_EX);
+        $rcc = new RCC($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV['BASE_URL']);
+        $png = $rcc->GenerateAssetThumbnail($assetId);
+
+        if ($png !== null) {
+            $png = base64_encode($png);
             header("Content-Type: image/png");
 	    header("Cache-Control: public, max-age=86400");
-            echo $png; exit;
+            die($png);
         }
     } catch (\Throwable $e) {
         error_log('[AssetRenderer] ' . $e->getMessage());
@@ -1927,7 +1924,10 @@ $router->get("/Thumbs/Asset.ashx", function() {
     if ($fallback && strpos($fallback, '/images/defaultimage.png') === false) {
         header("Location: " . $fallback, true, 302); exit;
     }
-    header("Location: /images/defaultimage.png", true, 302); exit;
+    //header("Location: /images/defaultimage.png", true, 302); exit;
+    header("Content-Type: image/png");
+    $png = file_get_contents("../public/images/defaultimage.png");
+    die($png);
 });
 
 $router->get("/Game/Tools/InsertAsset.ashx", function() {
@@ -1973,31 +1973,22 @@ $router->get("/Game/Tools/Avatar.ashx", function() {
     //$userId = $_GET["userId"];
     $target = isset($_GET["userId"]) ? (int)$_GET["userId"] : 0;
     
-    /*
     if ($target < 1 && isset($_GET["username"])) {
         $username = trim((string)$_GET["username"]);
-        $user = $username !== "" ? $db->table("users")->where("username", $username)->first();
-        if ($user) $target = (int)$user->id;
+        $user = ($username !== "") ? $db->table("users")->where("username", $username)->first() : null;
+        if ($user && $user !== null) $target = (int)$user->id;
     }
-    */
 
     if ($target < 1) { http_response_code(400); error_log("[AvatarRenderer] No UserId or Username"); die("Invalid userid or username"); }
     
     try {
-        $NewRCC = new RCCServiceSoap($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV["WEBRCC_URL"]); // baseurl was roblox.com
-        $script = file_get_contents("../storage/lua/avatarRenderer.lua");
-        $script = str_replace("%target%", $target, $script);
-        $script = str_replace("%baseurl%", $_ENV["BASE_URL"], $script);
+        $NewRCC = new RCC($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV["WEBRCC_URL"]); // baseurl was roblox.com
+        $png = $NewRCC->GeneratePlayerThumbnail($target);
 
-        // Execute the script we just made and get the result
-        $render = $NewRCC->execScript($script, rand(1, getrandmax()), 120);
-        $png = base64_decode((string)$render, true);
-        error_log("RCC Executed script i think idk");
-        if ($png !== false && substr($png, 0, 8) === "\x89PNG\r\n\x1a\n") {
+        if ($png !== null) {
             header("Content-Type: image/png");
             header("Cache-Control: public, max-age=3600");
             die($png);
-            exit;
         }
         //error_log($png);
     } catch (\Throwable $e) {
@@ -2005,7 +1996,7 @@ $router->get("/Game/Tools/Avatar.ashx", function() {
     }
 
     // use default thumb if rcc doesnt work
-    error_log("Returning default thumbnail since rcc failed.");
+    //error_log("Returning default thumbnail since rcc failed.");
     header("Content-Type: image/png");
     $png = file_get_contents("../public/images/defaultimage.png");
     die($png);
