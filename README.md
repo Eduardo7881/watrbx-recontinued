@@ -39,6 +39,8 @@ This is not everything! You should check the code and roadmap!
 ## Running
 I've only tested this project on Linux (Ubuntu). The instructions below cover several operating systems and distros, but I haven't tested all of them myself.
 
+You will also have to download the required assets that the client uses. (Animations, Sounds, Meses, etc.) (Mostly corescripts)
+
 ### Requirements
 
 To run the server, you'll need to install these stuff:
