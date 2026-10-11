@@ -73,7 +73,8 @@ class pagebuilder {
         $this->addmetatag("og:site_name", $_ENV["APP_NAME"]);
         $this->addmetatag("og:title", $_ENV["APP_NAME"] . " - " . $this->config['title']);
         $this->addmetatag("og:description", $_ENV["APP_DESC"]);
-        
+        $this->addresource("jsfiles", "/js/devtools-warning.js");
+
         // this HAS to be expanded in the future 
         if($this->authed){
             if($this->legacy){

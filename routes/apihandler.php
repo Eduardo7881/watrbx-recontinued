@@ -1984,7 +1984,7 @@ $router->get("/Game/Tools/Avatar.ashx", function() {
     if ($target < 1) { http_response_code(400); error_log("[AvatarRenderer] No UserId or Username"); die("Invalid userid or username"); }
     
     try {
-        $NewRCC = new RCCServiceSoap($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV["BASE_URL"]); // baseurl was roblox.com
+        $NewRCC = new RCCServiceSoap($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV["WEBRCC_URL"]); // baseurl was roblox.com
         $script = file_get_contents("../storage/lua/avatarRenderer.lua");
         $script = str_replace("%target%", $target, $script);
         $script = str_replace("%baseurl%", $_ENV["BASE_URL"], $script);
@@ -1992,18 +1992,23 @@ $router->get("/Game/Tools/Avatar.ashx", function() {
         // Execute the script we just made and get the result
         $render = $NewRCC->execScript($script, rand(1, getrandmax()), 120);
         $png = base64_decode((string)$render, true);
+        error_log("RCC Executed script i think idk");
         if ($png !== false && substr($png, 0, 8) === "\x89PNG\r\n\x1a\n") {
             header("Content-Type: image/png");
             header("Cache-Control: public, max-age=3600");
-            echo $png; exit;
+            die($png);
+            exit;
         }
-        error_log($png);
+        //error_log($png);
     } catch (\Throwable $e) {
         error_log("[AvatarRenderer] " . $e->getMessage());
     }
 
     // use default thumb if rcc doesnt work
-    header("Location: /images/defaultimage.png", true, 302); exit;
+    error_log("Returning default thumbnail since rcc failed.");
+    header("Content-Type: image/png");
+    $png = file_get_contents("../public/images/defaultimage.png");
+    die($png);
 });
 
 $router->get("/GetCurrentClientVersionUpload", function() {

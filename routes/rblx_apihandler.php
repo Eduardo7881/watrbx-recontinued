@@ -14,6 +14,69 @@ use asteroid\containers;
 global $router; // IMPORTANT: KEEP THIS HERE!
 global $db;
 
+/* Root APIs */
+$router->post("/abusereport/InGameChatHandler.ashx", function() {
+    $post = file_get_contents('php://input');
+    if(empty($post)) { http_response_code(500); die("Unknown Error"); }
+
+    $xmlarray = simplexml_load_string($post, 'SimpleXMLElement', LIBXML_NOCDATA);
+    $encoded = json_encode($xmlarray);
+    $decoded = json_decode($encoded, TRUE);
+    if (is_array($decoded)) {
+        $report = $decoded['@attributes'];
+        $userId = (int)$report['userID'];
+        $placeID = (int)$report['placeID'];
+        $gameJobID = filter_var($report['gameJobID'], FILTER_SANITIZE_FULL_SPECIAL_CHARACTERS, FILTER_FLAG_NO_ENCODE_QUOTES);
+
+        $comments = $decoded['comment'];
+        $comments = explode(";", $comments);
+        $AbuserID = str_replace("AbuserID:", "", $comments[0]);
+        print_r($comments);
+
+        $Type = $comments[1];
+        $decodedShit = strstr($decoded['comment'], "User Report");
+        $comments = explode("\n", $decodedShit);
+        $comments = str_replace(":", "", $comments);
+        $UserReport = $comments[1];
+        $messages = json_encode($decoded['messages']);
+
+        try {
+	    $dbPDO = $db->getPdo();
+            $stmt = $dbPDO->prepare("INSERT INTO `reports` (`userID`, `placeID`, `gameJobID`, `AbuserID`, `Type`, `UserReport`, `messages`) VALUES (:userID, :placeID, :gameJobID, :AbuserID, :Type, :UserReport, :messages)");
+            $stmt->execute(['userID'=>$userId,'placeID'=>$placeID,'gameJobID'=>$gameJobID,'AbuserID'=>$AbuserID,'Type'=>$Type,'UserReport'=>$UserReport,'messages'=>$messages]);
+        } catch (PDOException $e) {
+            error_log($e);
+            http_response_code(500);
+            echo "DataBase Error";
+            die();
+        }
+
+        echo "Success";
+        exit();
+    } else {
+        http_response_code(500);
+        echo "Unknown Error";
+        die();
+    }
+});
+
+$router->get("/currency/balance", function() {
+    header("Content-Type: application/json");
+
+    $auth = new authentication();
+    $RobuxBalance = 0;
+    $TixBalance = 0;
+
+    if($auth->hasaccount()) {
+        $userinfo = $auth->getuserinfo($_COOKIE["_ROBLOSECURITY"]);
+        $RobuxBalance = $userinfo->robux;
+        $TixBalance = $userinfo->tix;
+    }
+
+    $rarray = array("robux"=>$RobuxBalance,"tix"=>$TixBalance);
+    echo json_encode($rarray);
+});
+
 /* V1 APIs */
 $router->group("/v1", function($router) {
     $router->get("/asset", function() {
@@ -82,6 +145,21 @@ $router->post("/persistence/set", function() use ($db) {
     }
 
     echo json_encode(["success"=>true]);
+});
+
+/* Misc */
+$router->get("/Game/GetAllowedExperimentalFeatures", function() {
+    header("Content-Type: application/json");
+
+    $response = json_encode(["HttpAccessAllowed"=>true,"PersistenceAccessAllowed"=>true,"CreatePlaceAllowed"=>false,"PointsServiceAllowed"=>true]);
+    echo $response;
+    die();
+});
+
+$router->get("/Help/Builderman.aspx", function() {
+    // What is the purpose of this?
+    header("Location: https://en.help.roblox.com");
+    die();
 });
 
 ?>
