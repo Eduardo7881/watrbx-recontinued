@@ -1969,6 +1969,29 @@ $router->get("/Game/Badge/HasBadge.ashx", function() {
     }
 });
 
+$router->get("/Game/GamePass/GamePassHandler.ashx", function() {
+    global $db;
+    // Legacy Roblox client contract: Action=HasPass&UserID=%d&PassID=%d
+    $action = strtolower(trim((string)($_GET['Action'] ?? '')));
+    if ($action !== 'haspass') { http_response_code(400); header('Content-Type: text/plain; charset=utf-8'); echo '0'; return; }
+    $userId = (int)($_GET['UserID'] ?? $_GET['UserId'] ?? 0);
+    $passId = (int)($_GET['PassID'] ?? $_GET['PassId'] ?? 0);
+    if ($userId < 1 || $passId < 1) { header('Content-Type: text/plain; charset=utf-8'); echo '0'; return; }
+    $pass = $db->table('assets')->where('id', $passId)->where('prodcategory', 34)->first();
+    $owned = $pass ? $db->table('ownedassets')->where('userid', $userId)->where('assetid', $passId)->first() : null;
+    header('Content-Type: text/plain; charset=utf-8');
+    echo $owned ? 'true' : 'false';
+});
+
+$router->get("/Game/Badge/GetBadgeAwardDetails.ashx", function() {
+    global $db;
+    $badgeId = (int)($_GET['BadgeID'] ?? $_GET['BadgeId'] ?? 0);
+    $badge = $badgeId > 0 ? $db->table('badges')->where('id', $badgeId)->first() : null;
+    header('Content-Type: application/json; charset=utf-8');
+    if (!$badge) { http_response_code(404); echo json_encode(['success'=>false, 'message'=>'Badge not found']); return; }
+    echo json_encode(['success'=>true, 'badgeId'=>(int)$badge->id, 'name'=>$badge->title, 'description'=>$badge->description, 'universeId'=>(int)$badge->universeid]);
+});
+
 $router->get("/Game/Tools/Avatar.ashx", function() {
     //$userId = $_GET["userId"];
     $target = isset($_GET["userId"]) ? (int)$_GET["userId"] : 0;
