@@ -16,7 +16,7 @@
           },
           "Item": {
             "AssetId": 542845124,
-            "Name": "really rare thing",
+            "Name": "Inspection Light Item",
             "AbsoluteUrl": "/Inspection-Light-item?id=542845124",
             "AssetType": 0,
             "AssetTypeFriendlyLabel": null,
@@ -32,7 +32,7 @@
           },
           "Creator": {
             "Id": 1,
-            "Name": "watrbx",
+            "Name": "roblox",
             "Type": 1,
             "CreatorProfileLink": "/users/1/profile/"
           },

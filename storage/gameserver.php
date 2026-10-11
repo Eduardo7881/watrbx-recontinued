@@ -11,7 +11,6 @@ jobid = "<?=$jobid?>"
 
 ------------------- UTILITY FUNCTIONS --------------------------
 
-
 function waitForChild(parent, childName)
 	while true do
 		local child = parent:findFirstChild(childName)
@@ -40,7 +39,6 @@ settings().Network.WaitingForCharacterLogRate = 100
 pcall(function() settings().Diagnostics:LegacyScriptMode() end)
 
 -----------------------------------START GAME SHARED SCRIPT------------------------------
-
 local assetId = placeId -- might be able to remove this now
 local UserInputService = game:GetService('UserInputService')
 
@@ -53,8 +51,7 @@ game:GetService("ChangeHistoryService"):SetEnabled(false)
 
 -- establish this peer as the Server
 local ns = game:GetService("NetworkServer")
-
-pcall(function() game:GetService("NetworkServer"):SetIsPlayerAuthenticationRequired(true) end)
+pcall(function() game:GetService("NetworkServer"):SetIsPlayerAuthenticationRequired(true) end) -- what the fuck does this do
 
 if url~=nil then
 	pcall(function() game:GetService("Players"):SetAbuseReportUrl(url .. "/AbuseReport/InGameChatHandler.ashx") end)
@@ -89,35 +86,25 @@ settings().Diagnostics.LuaRamLimit = 0
 
 
 game:GetService("Players").PlayerAdded:connect(function(player)
-    print("Player " .. player.userId .. " added")
-player.CharacterAdded:connect(function(c)
-    game:GetObjects("rbxasset://fonts/characterCameraScript.rbxmx")[1].Parent = c
-    game:GetObjects("rbxasset://fonts/characterControlScript.rbxmx")[1].Parent = c
-    for i,v in pairs(c:GetChildren()) do
-    end
+    player.CharacterAdded:connect(function(character)
+        game:GetObjects("rbxasset://fonts/characterCameraScript.rbxmx")[1].Parent = character
+        game:GetObjects("rbxasset://fonts/characterControlScript.rbxmx")[1].Parent = character
     end)
 end)
 
-game:GetService("Players").PlayerRemoving:connect(function(player)
-	print("Player " .. player.userId .. " leaving")
-end)
-
 if placeId~=nil and url~=nil then
-	-- yield so that file load happens in the heartbeat thread
-	wait()
-	
-	-- load the game
-	game:Load(url .. "/asset/?id=" .. placeId)
+    -- yield so that file load happens in the heartbeat thread
+    wait()
+
+    -- load the game
+    game:Load(url .. "/asset/?id=" .. placeId)
 end
 
 -- Now start the connection
-ns:Start(port) 
-
+ns:Start(port)
 
 scriptContext:SetTimeout(10)
 scriptContext.ScriptsDisabled = false
-
-
 
 ------------------------------END START GAME SHARED SCRIPT--------------------------
 function onChatted(msg, speaker)
@@ -125,22 +112,13 @@ function onChatted(msg, speaker)
     msg = string.lower(msg)
     -- Note: This one is NOT caps sensitive
 
-    if msg == ";ec" then
-	local sound = Instance.new("Sound")
-    	sound.SoundId = url .. "/asset/?id=47"
-    	sound.Parent = speaker.Character.Torso
-    	sound.Volume = 0.5
-    	sound:Play()
-        speaker.Character.Humanoid.Health = 0
+    if msg == ".leave" then
+	speaker:Kick("")
     end
 
-    if msg == ";kick" then
-	    speaker:Kick("GET OUT!!!!!!!!")
-    end
-
-    if msg == ";sit" then
-		speaker.Character.Humanoid.Jump = true
-		wait(0.1)
+    if msg == "/e sit" then
+	speaker.Character.Humanoid.Jump = true
+	wait(0.1)
         speaker.Character.Humanoid.Sit = true
     end
 end
@@ -153,12 +131,12 @@ game.Players.ChildAdded:connect(onPlayerEntered)
 
 
 game:GetService("Players").PlayerAdded:connect(function(player)
-	print("Player " .. player.userId .. " added")
+	--print("Player " .. player.userId .. " added")
 	pcall(function() game:HttpGet(url .. "/api/v1/gameserver/client-presence?jobid=" .. jobid .. "=" .. apikey .. "=" .. player.userId .. "=connect")() end)
 end)
 
 game:GetService("Players").PlayerRemoving:connect(function(player)
-	print("Player " .. player.userId .. " leaving")	
+	--print("Player " .. player.userId .. " leaving")	
 	pcall(function() game:HttpGet(url .. "/api/v1/gameserver/client-presence?jobid=" .. jobid .. "=" .. apikey .. "=" .. player.userId .. "=disconnect")() end)
 end)
 
@@ -166,9 +144,6 @@ end)
 -- StartGame -- 
 game:GetService("RunService"):Run()
 pcall(function() print(game:HttpGet(url .. "/api/v1/gameserver/mark-active?jobid=" .. jobid .. "=" .. apikey))() end)
-
-
-
 
 end
 

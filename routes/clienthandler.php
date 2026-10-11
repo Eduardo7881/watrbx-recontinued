@@ -178,9 +178,15 @@ pcall(function() game:SetPlaceVersion(1) end)
     ');
 });
 
+/*-----------------------------------------------------------------------------------------*/
+
+//
+// App Settings
+//
+
 $router->get('/Setting/QuietGet/ClientAppSettings/', function(){
     header("Content-type: application/json");
-    $json = file_get_contents("../storage/clientappsettings.json");
+    $json = file_get_contents("../storage/AppSettingsStorage/ClientAppSettings.json");
     die($json);
 });
 
@@ -192,16 +198,29 @@ $router->get('/game/players/{userid}/', function($userid){
 
 $router->get('/Setting/QuietGet/ClientSharedSettings/', function(){
     header("Content-type: application/json");
-    $json = file_get_contents("../storage/clientappsettings.json");
+    $json = file_get_contents("../storage/AppSettingsStorage/ClientAppSettings.json");
     die($json);
 });
 
-// ed wuz here and added this (found on rocknet rblx)
+$router->get('/Setting/QuietGet/AndroidAppSettings/', function() {
+    header("Content-type: application/json");
+    $json = file_get_contents("../storage/AppSettingsStorage/AndroidAppSettings.json");
+    die($json);
+});
+
+$router->get('/Setting/QuietGet/iOSAppSettings/', function() {
+    header("Content-type: application/json");
+    $json = file_get_contents("../storage/AppSettingsStorage/iOSAppSettings.json");
+    die($json);
+});
+
 $router->get('/Setting/QuietGet/RCCService/', function() {
     header("Content-type: application/json");
     $json = file_get_contents("../storage/rccserviceflags.json");
     die($json);
 });
+
+/*-----------------------------------------------------------------------------------------*/
 
 // just so this wont error
 $router->get("/Error/Dmp.ashx", function() {
