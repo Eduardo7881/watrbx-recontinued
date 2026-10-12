@@ -9,6 +9,11 @@ storage/logs/*
 PrivateNut.pem
 public_key.pem
 
+# Composer Shit
+vendor
+vendor/*
+composer.lock
+
 # Pre-built clients and stuff
 public/SignedV1.apk
 public/SignedV2.apk
