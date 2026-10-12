@@ -2063,7 +2063,8 @@ $router->group("/account", function($router) {
             $robux = $userinfo->robux ?? 0;
             $newName = isset($_GET["username"]) ? (string)(urldecode($_GET["username"])) : null;
             if ($newName === null) die(json_encode(array('success'=>false,'message'=>'Invalid username.')));
-            
+
+            $newName = preg_replace('/[^a-zA-Z0-9-_\.]/', '', $newName);
             if ($newName === "LocalPlayer") die(json_encode(array('success'=>false,'message'=>'Invalid username.')));
             if (strlen($newName) < 3) die(json_encode(array('success'=>false,'message'=>'Username is too short.')));
             if (strlen($newName) > 20) die(json_encode(array('success'=>false,'message'=>'Username is too long.')));

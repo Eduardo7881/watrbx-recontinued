@@ -151,6 +151,7 @@ class sitefunctions {
         return $query->count();
     }
 
+    /*
     static function isbadtext($text){
         $badlist = array_map('trim', array_filter(explode(",", file_get_contents("../storage/bad_words.txt"))));
                 
@@ -161,7 +162,11 @@ class sitefunctions {
         }
         
         return false;
+    }
+    */
 
+    static function isbadtext($text) {
+        return !ConsoleTVs\Profanity\Builder::blocker($text)->clean();
     }
 
     public function set_message($message, $type = "error") {
