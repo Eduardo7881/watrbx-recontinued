@@ -4,6 +4,17 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
 global $dotenv;
 global $db;
 
+(function () {
+    // Request Logger
+    $method = $_SERVER["REQUEST_METHOD"] ?? "GET";
+    $uri = parse_url($_SERVER["REQUEST_URL"] ?? "/", PHP_URL_PATH);
+    register_shutdown_function(function() use ($method, $uri) {
+        $status = http_response_code();
+        if ($status === false) $status = 200;
+        $line = sprintf("[%d]: %s %s\n", $status,$method,$uri);
+    });
+});
+
 spl_autoload_register(function ($class_name) {
     $directory = '../classes/';
     $class_name = str_replace('\\', DIRECTORY_SEPARATOR, $class_name);

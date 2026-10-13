@@ -128,6 +128,11 @@ $router->get("/IDE/ClientToolbox.aspx", function() {
     $page::get_template("toolbox");
 });
 
+$router->get("/places/{id}/update", function($id) {
+    $page = new pagebuilder;
+    $page::get_template("UpdatePlace", ["id"=>$id]);
+});
+
 $router->get('/admin', function() {
     $auth = new authentication();
     $auth->requiresession();

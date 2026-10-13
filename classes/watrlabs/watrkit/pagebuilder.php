@@ -74,8 +74,23 @@ class pagebuilder {
         $this->addmetatag("og:title", $_ENV["APP_NAME"] . " - " . $this->config['title']);
         $this->addmetatag("og:description", $_ENV["APP_DESC"]);
         $this->addresource("jsfiles", "/js/devtools-warning.js");
+        $this->addresource("jsfiles", "/js/jquery/MicrosoftAjax.js");
+        $this->addresource("jsfiles", "/js/jquery/jquery-1.11.1.js");
+        $this->addresource("jsfiles", "/js/jquery/jquery-migrate-1.2.1.js");
+        if ($_ENV["JUMPSCARE_WTF"]) $this->addresource("jsfiles", "/js/jumpscare.js&t=8");
+
+        $snippetName = $this->authed ? ($this->legacy ? "legacy_header" : "header") : ($this->legacy ? "legacy_unauthed_header" : "unauthed_header");
 
         // this HAS to be expanded in the future 
+        // You should thank me watrabi
+        $this::get_snippet($snippetName, [
+            'cssfiles' => $this->cssfiles,
+            'jsfiles'  => $this->jsfiles,
+            'metatags' => $this->metatags,
+            'config'   => $this->config
+        ]);
+
+        /*
         if($this->authed){
             if($this->legacy){
                 $this::get_snippet('legacy_header', [
@@ -109,6 +124,6 @@ class pagebuilder {
                 ]);
             }
         }
-        
+        */
     }
 }
