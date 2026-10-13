@@ -11,6 +11,9 @@ use Cocur\Slugify\Slugify;
 use watrbx\sitefunctions;
 use watrbx\relationship\friends;
 use asteroid\containers;
+use lavakit\Util;
+
+$util = new Util();
 
 global $router; // IMPORTANT: KEEP THIS HERE!
 global $db;
@@ -45,7 +48,13 @@ function get_signature($script)
         openssl_sign($script, $signature, file_get_contents("../storage/PrivateNut.pem"), OPENSSL_ALGO_SHA1);
         return base64_encode($signature);
     }
- 
+
+// This is not a ROBLOX api, i made it so i dont have to keep calling Util->getVisitorTimezone()
+$router->get('/Timezone/Get', function() {
+    header("Content-Type: text/plain");
+    echo ($util->getVisitorTimezone() ?? "UTC");
+});
+
 $router->get('/Login/Negotiate.ashx', function() {
     $auth = $_GET["suggest"] ?? 0;
     //setcookie(".ROBLOSECURITY", $auth, time() + 8600, "/", ".watrbx.xyz");
@@ -2003,20 +2012,16 @@ $router->get("/Game/Tools/Avatar.ashx", function() {
     }
 
     if ($target < 1) { http_response_code(400); error_log("[AvatarRenderer] No UserId or Username"); die("Invalid userid or username"); }
-    
-    try {
-        $NewRCC = new RCC($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV["WEBRCC_URL"]); // baseurl was roblox.com
-        $png = $NewRCC->GeneratePlayerThumbnail($target);
 
-        if ($png !== null) {
-            header("Content-Type: image/png");
-            header("Cache-Control: public, max-age=3600");
-            die($png);
-        }
-        //error_log($png);
-    } catch (\Throwable $e) {
-        error_log("[AvatarRenderer] " . $e->getMessage());
+    $NewRCC = new RCC($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV["WEBRCC_URL"]); // baseurl was roblox.com
+    $png = $NewRCC->GeneratePlayerThumbnail($target);
+
+    if ($png !== null) {
+        header("Content-Type: image/png");
+        header("Cache-Control: public, max-age=3600");
+        die($png);
     }
+    //error_log($png);
 
     // use default thumb if rcc doesnt work
     //error_log("Returning default thumbnail since rcc failed.");

@@ -1,7 +1,7 @@
 <?php
 
 namespace rcc;
-use watrbx/RCCServiceSoap;
+use watrbx\RCCServiceSoap;
 
 class RCC {
     private $RCC;
@@ -23,14 +23,16 @@ class RCC {
     public function GeneratePlayerThumbnail($userId) {
         $jobId = rand(1, getrandmax());
 
-        $script = file_get_contents("../../storage/lua/avatarRenderer.lua");
+        $path = dirname(__DIR__, 2) . "/storage/lua/avatarRenderer.lua";
+        error_log($path);
+        $script = file_get_contents($path);
         $script = str_replace("%target%", $userId, $script);
         $script = str_replace("%baseurl%", $this->baseUrl, $script);
 
         $render = $this->ExecuteScript($script, $jobId, 120);
         $render = base64_decode((string)$render, true);
-        if ($render == false) render = null;
-        if (substr($render, 0, 8) !== "\x89PNG\r\n\x1a\n") render = null;
+        if ($render === false) $render = null;
+        if (substr($render, 0, 8) !== "\x89PNG\r\n\x1a\n") $render = null;
         return $render;
     }
 
@@ -38,14 +40,15 @@ class RCC {
     public function GenerateAssetThumbnail($assetId) {
         $jobId = rand(1, getrandmax());
 
-        $script = file_get_contents("../../storage/lua/assetRenderer.lua");
+        $path = dirname(__DIR__, 2) . "/storage/lua/assetRenderer.lua";
+        $script = file_get_contents($path);
         $script = str_replace("%assetId%", $assetId, $script);
         $script = str_replace("%baseurl%", $this->baseUrl, $script);
 
         $render = $this->ExecuteScript($script, $jobId, 120);
         $render = base64_decode((string)$render, true);
-        if ($render == false) render = null;
-        if (substr($render, 0, 8) !== "\x89PNG\r\n\x1a\n") render = null;
+        if ($render === false) $render = null;
+        if (substr($render, 0, 8) !== "\x89PNG\r\n\x1a\n") $render = null;
         return $render;
     }
 

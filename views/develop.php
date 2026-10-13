@@ -1,14 +1,41 @@
 <?php 
 use watrlabs\watrkit\pagebuilder;
+
+/* SRC
+
+   <link rel="stylesheet" href="/CSS/Base/CSS/FetchCSS?path=page___cda0cc7c6f454f40a6342985b7a289e6_m.css">
+        <link rel="stylesheet" href="/CSS/Base/CSS/FetchCSS?path=page___693f28640f335d1c8bc50c5a11d7ad3d_m.css">
+        <link rel="stylesheet" href="/CSS/Pages/Build/BuildPage.css">
+        <link rel="stylesheet" href="/CSS/Pages/Build/Develop.css">
+        <link rel="stylesheet" href="/CSS/Pages/Build/DropDownMenus.css">
+        <link rel="stylesheet" href="/CSS/Pages/Build/Navigation.css">
+        <link rel="stylesheet" href="/CSS/Pages/Build/StudioWidget.css">
+        <link rel="stylesheet" href="/CSS/Pages/Build/Upload.css">
+
+<script type="text/javascript" src="/js/c5827143734572fa7bd8fcc79c3c126b.js.gzip"></script>
+
+        <script type="text/javascript" src="/js/22f5b93b0e23b69d9c48f68ea3c65fe3.js.gzip"></script>
+        <script type="text/javascript" src="/js/6385cae49dc708a8f2f93167ad17466d.js.gzip"></script>
+        <script type="text/javascript" src="/js/f3251ed8271ce1271b831073a47b65e3.js.gzip"></script>
+        <script type="text/javascript" src="/js/2580e8485e871856bb8abe4d0d297bd2.js.gzip"></script>
+*/
+
 $pagebuilder = new pagebuilder();
 $pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=main___52c69b42777a376ab8c76204ed8e75e2_m.css');
+$pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=page___cda0cc7c6f454f40a6342985b7a289e6_m.css');
+$pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=page___693f28640f335d1c8bc50c5a11d7ad3d_m.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Pages/Build/BuildPage.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Pages/Build/Develop.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Pages/Build/DropDownMenus.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Pages/Build/Navigation.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Pages/Build/StudioWidget.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Pages/Build/Upload.css');
+
 $pagebuilder->addresource('jsfiles', '/js/c5827143734572fa7bd8fcc79c3c126b.js.gzip');
+$pagebuilder->addresource('jsfiles', '/js/22f5b93b0e23b69d9c48f68ea3c65fe3.js.gzip');
+$pagebuilder->addresource('jsfiles', '/js/6385cae49dc708a8f2f93167ad17466d.js.gzip');
+$pagebuilder->addresource('jsfiles', '/js/f3251ed8271ce1271b831073a47b65e3.js.gzip');
+$pagebuilder->addresource('jsfiles', '/js/2580e8485e871856bb8abe4d0d297bd2.js.gzip');
 $pagebuilder->set_page_name("Develop");
 
 $pagebuilder->setlegacy(true);
