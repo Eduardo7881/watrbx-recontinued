@@ -1,4 +1,8 @@
-# WatrBX Recontinued (a.k.a. `watrbx-fixed`)
+# DO NOT USE THIS!!1!1!1!
+It uses a shit codebase version of watrbx and im working on to transfer it onto the latest version!
+Sorry for interuptions.
+
+## WatrBX Recontinued (a.k.a. `watrbx-fixed`)
 
 WatrBX Recontinued is a continuation of **watrbx 1**, an old Roblox revival from around 2015-2016.
 
