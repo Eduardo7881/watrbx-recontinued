@@ -1913,9 +1913,12 @@ $router->get("/Thumbs/Asset.ashx", function() {
     $asset = $db->table("assets")->where("id", $assetId)->first();
     if (!$asset) { http_response_code(404); die("Asset not found"); }
 
+    $x = isset($_GET["x"]) ? (int)$_GET["x"] : 500;
+    $y = isset($_GET["y"]) ? (int)$_GET["y"] : 500;
+
     try {
         $rcc = new RCC($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV['BASE_URL']);
-        $png = $rcc->GenerateAssetThumbnail($assetId);
+        $png = $rcc->GenerateAssetThumbnail($assetId, $x, $y);
 
         if ($png !== null) {
             $png = base64_encode($png);
@@ -2004,7 +2007,9 @@ $router->get("/Game/Badge/GetBadgeAwardDetails.ashx", function() {
 $router->get("/Game/Tools/Avatar.ashx", function() {
     //$userId = $_GET["userId"];
     $target = isset($_GET["userId"]) ? (int)$_GET["userId"] : 0;
-    
+    $x = isset($_GET["x"]) ? (int)$_GET["x"] : 500;
+    $y = isset($_GET["y"]) ? (int)$_GET["y"] : 500;
+
     if ($target < 1 && isset($_GET["username"])) {
         $username = trim((string)$_GET["username"]);
         $user = ($username !== "") ? $db->table("users")->where("username", $username)->first() : null;
@@ -2014,7 +2019,7 @@ $router->get("/Game/Tools/Avatar.ashx", function() {
     if ($target < 1) { http_response_code(400); error_log("[AvatarRenderer] No UserId or Username"); die("Invalid userid or username"); }
 
     $NewRCC = new RCC($_ENV["WEBRCC_IP"], (int)$_ENV["WEBRCC_PORT"], $_ENV["WEBRCC_URL"]); // baseurl was roblox.com
-    $png = $NewRCC->GeneratePlayerThumbnail($target);
+    $png = $NewRCC->GeneratePlayerThumbnail($target, $x, $y, "body");
 
     if ($png !== null) {
         header("Content-Type: image/png");
