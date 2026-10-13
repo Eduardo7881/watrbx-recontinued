@@ -25,12 +25,17 @@ $pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=main___7000c4
 $pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=leanbase___213b3e760be9513b17fafaa821f394bf_m.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=page___5c81dac2107fac0cca40ea7d6cfd0c89_m.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=page___91ce90e508d798217cc5452e978970d5_m.css');
+$pagebuilder->addresource('cssfiles', '/CSS/Pages/develop.css');
+$pagebuilder->addresource('cssfiles', '/CSS/Pages/gamesEdit.css');
+$pagebuilder->addresource('cssfiles', '/CSS/Pages/upload.css');
+
 $pagebuilder->addresource('jsfiles', '/js/35442da4b07e6a0ed6b085424d1a52cb.js');
 $pagebuilder->addresource('jsfiles', '/js/745eb2b4d8d8058bd5a17a1fdc8a719a.js');
 $pagebuilder->addresource('jsfiles', '/js/f49d858ef181e7cd401d8fcb4245e6e8.js.gzip');
 $pagebuilder->addresource('jsfiles', '/js/6b9fed5e91a508780b95c302464d62ef.js.gzip');
 $pagebuilder->set_page_name("Configure Place");
 $pagebuilder->buildheader();
+
 
 $placeId = $id; // PHP is really weird....
 $query = $db->table("assets")->where("id", $id);
@@ -44,9 +49,11 @@ if($assetinfo == null) die("Failed to find asset!");
 $creatorInfo = $auth->getuserbyid($gameinfo->owner);
 
 /*
+$id = 1;
+$placeId = 1;
 $assetinfo = null;
 $creator = 1;
-$assetinfo = $query->first();
+$assetinfo = "nothing";
 $gameOwnerId = 1;
 $gameTitle = "test game";
 $gameDescription = "game";
