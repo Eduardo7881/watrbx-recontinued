@@ -7,27 +7,20 @@ $router = new Routing();
 $pagebuilder = new pagebuilder();
 $auth = new authentication();
 
+/* Do some checks so we know the game is valid and can be edited by this guy */
+$loggedin = $auth->hasaccount();
+if (!$loggedin) { header("Location: /newlogin"); die(); }
+
 global $db;
 $query = $db->table("universes")->where("id", $id);
 $gameinfo = $query->first();
 
-if($gameinfo == null){
-    //die("Failed to load game info!");
-    $gameinfo = "w"; // testing
-}
+if($gameinfo == null) die("Failed to load game info!");
 
-/*
-<link rel="stylesheet" href="/CSS/Base/CSS/FetchCSS?path=main___7000c43d73500e63554d81258494fa21_m.css">
-        <link rel="stylesheet" href="/CSS/Base/CSS/FetchCSS?path=leanbase___213b3e760be9513b17fafaa821f394bf_m.css">
-        <link rel="stylesheet" href="/CSS/Base/CSS/FetchCSS?path=page___5c81dac2107fac0cca40ea7d6cfd0c89_m.css">
-        <link rel="stylesheet" href="/CSS/Base/CSS/FetchCSS?path=page___91ce90e508d798217cc5452e978970d5_m.css">
+$userinfo = $auth->getuserinfo($_COOKIE["_ROBLOSECURITY"]);
+if ($gameinfo->owner !== $userinfo->id) { http_response_code(403); header("Location: /"); die("You're not allowed to do that!"); }
 
-<script type='text/javascript' src='/js/f49d858ef181e7cd401d8fcb4245e6e8.js.gzip'></script>
-<script type='text/javascript' src='/js/745eb2b4d8d8058bd5a17a1fdc8a719a.js'></script>
-/js/6b9fed5e91a508780b95c302464d62ef.js.gzip
-/js/745eb2b4d8d8058bd5a17a1fdc8a719a.js
-*/
-
+/* Apparently, watrbx 2 uses JQUERY and AJAX for some pages, so I had to include them here. The scripts are added on pagebuilder->buildheader() method. So it's added on every page. */
 $pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=main___7000c43d73500e63554d81258494fa21_m.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=leanbase___213b3e760be9513b17fafaa821f394bf_m.css');
 $pagebuilder->addresource('cssfiles', '/CSS/Base/CSS/FetchCSS?path=page___5c81dac2107fac0cca40ea7d6cfd0c89_m.css');
@@ -37,41 +30,28 @@ $pagebuilder->addresource('jsfiles', '/js/745eb2b4d8d8058bd5a17a1fdc8a719a.js');
 $pagebuilder->addresource('jsfiles', '/js/f49d858ef181e7cd401d8fcb4245e6e8.js.gzip');
 $pagebuilder->addresource('jsfiles', '/js/6b9fed5e91a508780b95c302464d62ef.js.gzip');
 $pagebuilder->set_page_name("Configure Place");
-
-$loggedin = $auth->hasaccount();
 $pagebuilder->buildheader();
 
-if (!$loggedin) { header("Location: /newlogin"); die(); }
 $placeId = $id; // PHP is really weird....
-
-/*
 $query = $db->table("assets")->where("id", $id);
-$assetinfo = $query->first();
+$assetInfo = $query->first();
 $gameOwnerId = $gameinfo->owner;
 $gameTitle = $gameinfo->title;
 $gameDescription = $gameinfo->description;
 $gamePublic = $gameinfo->public;
+if($assetinfo == null) die("Failed to find asset!");
 
-if($assetinfo == null){
-    die("Failed to find asset!");
-}
-$creator = $auth->getuserbyid($gameinfo->owner);
+$creatorInfo = $auth->getuserbyid($gameinfo->owner);
 
-$upvotes = $db->table("likes")->where("assetid", $id)->where("vote", 1)->count();
-$downvotes = $db->table("likes")->where("assetid", $id)->where("vote", 0)->count();
-*/
-
+/*
 $assetinfo = null;
 $creator = 1;
 $assetinfo = $query->first();
 $gameOwnerId = 1;
 $gameTitle = "test game";
 $gameDescription = "game";
-$gamePublic = true;
-
-$userinfo = $auth->getuserinfo($_COOKIE["_ROBLOSECURITY"]);
-if ($gameOwnerId !== $userinfo->id) { http_response_code(403); die(); }
-
+$gamePublic = 1;
+*/
 ?>
 
 <script type="text/javascript">
